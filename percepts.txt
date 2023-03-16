@@ -1,0 +1,22 @@
+None, None, None, None
+B, None, None, None
+None, None, None, None
+B, None, None, None
+None, S, None, None
+None, S, None, None
+B, None, None, None
+None, None, None, None
+None, None, None, None
+B, S, G, None
+None, None, None, None
+B, None, None, None
+None, S, None, None
+None, None, None, None
+B, None, None, None
+None, None, None, None
+
+
+
+
+
+
