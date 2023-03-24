@@ -22,15 +22,16 @@ start_pos = 0
 env = [[0, "b", "P", "b"],
         ["s", 5, "b", 7],
         ["W", "b,s", "P", "b"],
-        ["s", 13, "b", "G"]]
+        ["s", "G", "b", 15]]
 
 
 
 class box:
     def __init__(self):
         self.id = 0
-        self. status = 0
+        self. ok = 0
         self.percept = []
+        self.parent = None
 
 #Building the grid
 l=[]
@@ -88,11 +89,11 @@ assignments = None
 
 while(stack!=[]):
     top = stack.pop()
-
+    
     if(top.id not in visited):
         #Visiting the Cell
         print(top.id)
-        top.status = 1
+        top.ok = 1
         formula = set()
         #Getting Percept
         print("Percept", top.percept)
@@ -115,7 +116,6 @@ while(stack!=[]):
                 
                 if(i.id not in visited):
                     formula.add(("W{}".format(i.id), True))
-                    print(formula)
             KB.append(formula)
             formula = set()
 
@@ -126,19 +126,55 @@ while(stack!=[]):
             KB.append(formula)
             formula = set()
         
+        #Death Conditions
+        if("P" in top.percept):
+            formula.add(("P{}".format(top.id), True))
+            KB.append(formula)
+            formula = set()
+
+            formula.add(("W{}".format(top.id), False))
+            KB.append(formula)
+            formula = set()
+            
+            print("Reset")
+            visited = set()
+            stack.clear()
+
+        if("W" in top.percept):
+            formula.add(("W{}".format(top.id), True))
+            KB.append(formula)
+            formula = set()
+
+            formula.add(("P{}".format(top.id), False))
+            KB.append(formula)
+            formula = set()
+
+            print("Reset")
+            visited = set()
+            stack.clear()
+
+        if("G" in top.percept):
+            print("Goal Found")
+            exit()
+        
         for i in graph[top]:
+            i.parent = top
             sat, assignments = dpll(KB)
-            #print(KB)
             #print(assignments)
-            if(check_all_literals()):
+            print(assignments)
+
+            if(assignments == None):
+                print(KB)
+                exit()
+
+            try:
+                if((not assignments["W{}".format(i.id)]) and (not assignments["P{}".format(i.id)])):
+                    stack.append(i)
+                else:
+                    pass
+            except:
                 stack.append(i)
-            else:
-                #Back Track
-                for p in graph.keys():
-                    if((top in graph[p]) and (p in visited)):
-                        stack.append(p)
-                        visited.remove(p.id)
-                #stack.append(visited[-1])           
+
     else:
         pass
 
