@@ -1,5 +1,46 @@
 from dpll_solver import *
 
+grid= []
+graph = {}       
+
+def build_grid_adjacency_list():
+    #Building the grid
+    l=[]
+    ctr = 0
+    
+    for i in range(4):
+        for j in range(4):
+            ob = box()
+            ob.id = ctr
+            if((str(env[i][j]).isalpha()) and ("," not in env[i][j])):
+                ob.percept.append(env[i][j])
+            elif("," in str(env[i][j])):
+                ob.percept.extend(env[i][j].split(",")) 
+            else:
+                pass
+            l.append(ob)
+            ctr+=1
+        grid.append(l)
+        l=[]
+
+    #Building Adjancency List
+    
+    l = []
+    for i in range(4):
+        for j in range(4):
+            if(j+1 < 4):
+                l.append(grid[i][j+1])
+                graph[grid[i][j]] = l
+            if(i+1 < 4):
+                l.append(grid[i+1][j])
+                graph[grid[i][j]] = l
+            if(i-1>=0):
+                l.append(grid[i-1][j])
+                graph[grid[i][j]] = l
+            if(j-1>=0):
+                l.append(grid[i][j-1])
+                graph[grid[i][j]] = l
+            l = []
 
 
 def check_all_literals():
@@ -19,10 +60,15 @@ percepts = p.readlines()
 
 start_pos = 0
 
-env = [[0, "b", "P", "b"],
+"""env = [[0, "b", "P", "b"],
         ["s", 5, "b", 7],
         ["W", "b,s", "P", "b"],
-        ["s", "G", "b", 15]]
+        ["s", 13, "b", "G"]]"""
+
+env = [[0, "b", "P", "b"],
+        ["s", 5, "b", 7],
+        ["W", "s,shoot", 10, 11],
+        ["s", 13, 14, "G"]]
 
 
 
@@ -33,43 +79,7 @@ class box:
         self.percept = []
         self.parent = None
 
-#Building the grid
-l=[]
-ctr = 0
-grid= []
-for i in range(4):
-    for j in range(4):
-        ob = box()
-        ob.id = ctr
-        if((str(env[i][j]).isalpha()) and ("," not in env[i][j])):
-            ob.percept.append(env[i][j])
-        elif("," in str(env[i][j])):
-            ob.percept.extend(env[i][j].split(",")) 
-        else:
-            pass
-        l.append(ob)
-        ctr+=1
-    grid.append(l)
-    l=[]
-
-#Building Adjancency List
-graph = {}
-l = []
-for i in range(4):
-    for j in range(4):
-        if(j+1 < 4):
-            l.append(grid[i][j+1])
-            graph[grid[i][j]] = l
-        if(i+1 < 4):
-            l.append(grid[i+1][j])
-            graph[grid[i][j]] = l
-        if(i-1>=0):
-            l.append(grid[i-1][j])
-            graph[grid[i][j]] = l
-        if(j-1>=0):
-            l.append(grid[i][j-1])
-            graph[grid[i][j]] = l
-        l = []
+build_grid_adjacency_list()
 
 #Intial Conditions for KB - Literals are P, W
 KB.append({("P0", False)})
@@ -138,7 +148,7 @@ while(stack!=[]):
             
             print("Reset")
             visited = set()
-            stack.clear()
+            stack = [grid[0][0]]
 
         if("W" in top.percept):
             formula.add(("W{}".format(top.id), True))
@@ -149,13 +159,42 @@ while(stack!=[]):
             KB.append(formula)
             formula = set()
 
-            print("Reset")
-            visited = set()
-            stack.clear()
+            print("Agent Killed by Wumpus")
+            
 
         if("G" in top.percept):
-            print("Goal Found")
+            print("Gold Found")
             exit()
+
+        if("shoot" in top.percept):
+            curr = top.id
+            cnt = 0
+            for m in range(len(env)):
+                for n in range(len(env)):
+                    if(top.id == cnt):
+                        for temp in range(len(env)):
+                            if(env[m][temp] == "W"):
+                                env[m][temp] = ""
+                                if(env[m-1][temp] == "s"):
+                                    env[m-1][temp] = ""
+                                if(env[m+1][temp] == "s"):
+                                    env[m+1][temp] = ""
+                                if(env[m][temp+1] == "s"):
+                                    env[m][temp+1] = ""
+                                build_grid_adjacency_list()
+
+                            if(env[temp][n] == "W"):
+                                env[temp][n] = ""
+                                if(env[temp-1][n] == "s"):
+                                    env[temp-1][n] = ""
+                                if(env[temp+1][n] == "s"):
+                                    env[temp+1][n] = ""
+                                if(env[temp][n+1] == "s"):
+                                    env[temp][n+1] = ""
+                                build_grid_adjacency_list()   
+                                
+                        break
+                         
         
         for i in graph[top]:
             i.parent = top

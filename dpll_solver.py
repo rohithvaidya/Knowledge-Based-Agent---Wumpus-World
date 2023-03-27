@@ -1,7 +1,7 @@
 # The Formula is of the form (a V b V c)
 #The CNF formula is thus a list of disjunctive clauses . aka our KB
 
-#KB = [{("p", True)}, {("p", False)}]
+#KB = [{("p", True)}, {("q", False)}]
 
 def __select_literal(cnf):
     for c in cnf:
