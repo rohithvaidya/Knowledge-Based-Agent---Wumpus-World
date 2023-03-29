@@ -55,9 +55,6 @@ def check_all_literals():
 
 KB = []
 
-p = open("percepts.txt", "r")
-percepts = p.readlines()
-
 start_pos = 0
 
 """env = [[0, "b", "P", "b"],
